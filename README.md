@@ -1,2 +1,2 @@
-EpicX : The epic that name of 'X'
+# EpicX : The epic that name of 'X'
 A simple web-based environment for game-based learning and workshop.
