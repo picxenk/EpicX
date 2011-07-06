@@ -135,7 +135,7 @@ EpicX.prototype = {
 						id: userID,
 						tox: 100,
 						toy: 100,
-
+						todir: 0,
 					}
 				}
 				callback(user);
