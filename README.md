@@ -12,6 +12,7 @@ Requirements
 NodeJS Libraries 
 ----------------
 npm install 
+
  * websocket-server
  * node-static
  * mongodb

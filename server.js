@@ -1,6 +1,6 @@
 /** CONFIG **/
 var config = {
-    'host_ip': '127.0.0.1',
+    'host_ip': '192.168.0.79',
     'http_port': 8000,
     'ws_port': 8080,
     'public_path': './public',
@@ -8,6 +8,7 @@ var config = {
     'mongo_host': 'localhost',
     'mongo_port': 27017,
     'db': 'epicx',
+	'debug': false,
 };
 
 /** REQUIRED MODULES **/
@@ -25,7 +26,7 @@ var db = new mongo.Db(config.db, new mongo.Server(config.mongo_host, config.mong
 db.addListener('error', function(error) {
     console.log('[Error]: connection to MongoDB');
 });
-var server = ws.createServer({debug: true});
+var server = ws.createServer({debug: config.debug});
 var file = new(static.Server)(config.public_path);
 var http_server = http.createServer(function(req, res) {
     req.addListener('end', function() {
