@@ -33,6 +33,9 @@ EpicX.prototype = {
             case 'update':
                 data = this.msg_update(message);
                 break;
+            case 'chat':
+                data = this.msg_chat(message);
+                break;
 			case 'refresh':
 				this.msg_refresh(message);
 				break;
@@ -81,6 +84,16 @@ EpicX.prototype = {
         return data;
     },
 
+    /** Message : chat **/
+    msg_chat: function(message) {
+        console.log(this.log_header+'RUN(CHAT)');
+        var data = {
+            type: 'chat',
+            msg: message.msg,
+        };
+        this.logChat(message);
+        return data;
+    },
     /** Message : refresh **/
     msg_refresh: function(message) {
         console.log(this.log_header+'RUN(REFRESH)');
@@ -117,6 +130,22 @@ EpicX.prototype = {
                 }
             });
             console.log('[DB]insert new user: '+userData.id);
+        });
+    },
+
+    /** DB : log chat message **/
+    logChat: function(message) {
+        var chatData = {
+            //id: this.ids[con.id],
+			id: message.id,
+			msg: message.msg,
+            //date: ,
+        };
+        this.db.collection('chats', function(err, collection) {
+            collection.insert(chatData, {safe:true}, function(err, obj) {
+                if (err) console.warn(err.message);
+            });
+            console.log('[DB]INSERT CHAT: '+chatData.id);
         });
     },
 

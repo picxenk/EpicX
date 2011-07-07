@@ -1,12 +1,31 @@
-<!DOCTYPE html>
-<html>
+﻿<html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="/css/main.css"></link>
 	</head>
 	<body>
 		<div id="layer">
-			<canvas id="canvas"></canvas>
+			<div id="prop">
+				<div>
+					<label>id</label>
+					<input id="input_id"></input>
+					<button id="button_id">선택</button>
+				</div>
+				<div>
+					<label>HP</label>
+					<input id="range_hp" type="range" min="1" max="10" value="1" />
+				</div>
+				<div>
+					<label>MP</label>
+					<input id="range_mp" type="range" min="1" max="10" value="1" />
+				</div>
+				<div id="member_info">
+				</div>
+			</div>
+			<div id="frame">
+				<canvas id="canvas"></canvas>
+			</div>
 		</div>
+		<script type="text/javascript" src="/js/GS.js"></script>
 		<script type="text/javascript" src="/js/main.js"></script>
 	</body>
 </html>
