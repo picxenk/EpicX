@@ -1,10 +1,10 @@
-﻿var canvas = document.querySelector("#canvas");
-canvas.width = window.innerWidth - 424;
+var canvas = document.querySelector("#canvas");
+canvas.width = window.innerWidth - 450;
 canvas.height = 600;
 var ctx = canvas.getContext("2d");
 ctx.font = "12px Arial";
 //var socket = new WebSocket("ws://222.117.120.215:8080");
-var socket = new WebSocket("ws://127.0.0.1:8080");
+var socket = new WebSocket("ws://10.1.31.107:8080");
 var frameCount = 0;
 
 var input_id = document.querySelector("#input_id");
@@ -12,6 +12,8 @@ var button_id = document.querySelector("#button_id");
 var range_hp = document.querySelector("#range_hp");
 var range_mp = document.querySelector("#range_mp");
 var member_info = document.querySelector("#member_info");
+var input_chat = document.querySelector("#input_chat");
+var button_chat = document.querySelector("#button_chat");
 
 var members = {};
 var ptcls = [];
@@ -80,6 +82,11 @@ var update = function() {
 var draw = function() {
 	ctx.fillStyle = "black";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	ctx.fillStyle = "yellow";
+	if(thePtcl != null) {
+		var pos = "x: " + Math.floor(thePtcl.x) + " y: " + Math.floor(thePtcl.y);
+		ctx.fillText(pos, 20, 20);
+	}
 	
 	camera.begin();
 	
@@ -122,6 +129,7 @@ var addPtcl = function(id, info) {
 	ptcl.hp = 0;
 	ptcl.mp = 0;
 	ptcl.name = info["이름"];
+	ptcl.msg = "";
 	ptcl.gender = "f";
 	if(info["성별"] === "남") {
 		ptcl.gender = "m";
@@ -177,6 +185,7 @@ var addPtcl = function(id, info) {
 		ctx.fillRect(0, 17, this.mp * 3, 5);
 		ctx.fillStyle = "white";
 		ctx.fillText(this.name, 0, 35);
+		ctx.fillText(this.msg, 0, 55);
 	}
 	
 	ptcl.draw = function() {
@@ -347,6 +356,19 @@ button_id.onclick = function() {
 	}
 }
 
+button_chat.onclick = function() {
+	if(thePtcl != null) {
+		var msg = input_chat.value;
+		thePtcl.msg = msg;
+		var data = {
+			type: "chat",
+			id: thePtcl.id,
+			msg: msg
+		};
+		socket.send(JSON.stringify(data));
+	}
+}
+
 
 socket.onopen = function(evt) {
   //socket.send(JSON.stringify(me));
@@ -387,8 +409,13 @@ socket.onmessage = function(evt) {
 				members[data.id].ptcl.mp = data.mp;
 			}
 			break;
+		case "chat" :
+			console.log("!");
+			members[data.id].ptcl.msg = data.msg;
+			break;
 	}
 }
 socket.onclose = function(event) { console.log('closed') }; 
 
-GS.loadJSON("https://spreadsheets.google.com/feeds/cells/0AgNA5QSGhdCgdHJFbUFLTnllTi1qOXBkZU1iUThfakE/od7/public/basic?hl=en_US&alt=json", init, 26);
+//GS.loadJSON("https://spreadsheets.google.com/feeds/cells/0AgNA5QSGhdCgdHJFbUFLTnllTi1qOXBkZU1iUThfakE/od7/public/basic?hl=en_US&alt=json", init, 26);
+GS.loadJSON("https://spreadsheets.google.com/feeds/cells/0AgNA5QSGhdCgdHJFbUFLTnllTi1qOXBkZU1iUThfakE/od5/public/basic?hl=en_US&alt=json", init, 26);

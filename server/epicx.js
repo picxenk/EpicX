@@ -88,10 +88,11 @@ EpicX.prototype = {
     msg_chat: function(message) {
         console.log(this.log_header+'RUN(CHAT)');
         var data = {
+            id: message.id,
             type: 'chat',
             msg: message.msg,
         };
-        this.logChat(message);
+        //this.logChat(message);
         return data;
     },
     /** Message : refresh **/
