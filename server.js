@@ -1,6 +1,6 @@
 /** CONFIG **/
 var config = {
-    'host_ip': '10.1.31.107',
+    'host_ip': '10.1.32.156',
     //'host_ip': '127.0.0.1',
     'http_port': 8000,
     'ws_port': 8080,

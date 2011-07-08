@@ -150,7 +150,7 @@ EpicX.prototype = {
         });
     },
 
-    /** DB : get user info **/
+    /** DB : get user info 사용자의 경험을 우려내자!**/
 	getUserInfo: function(userID, callback) {
 		var epicx = this;
 		this.db.collection('users', function(err, collection) {
@@ -194,4 +194,5 @@ EpicX.prototype = {
     },
 };
 
+// 우리는 오늘 무엇을 경험한거지??
 exports.EpicX = EpicX;
