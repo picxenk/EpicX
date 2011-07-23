@@ -4,10 +4,9 @@ canvas.height = 600;
 var ctx = canvas.getContext("2d");
 ctx.font = "12px Arial";
 //var socket = new WebSocket("ws://222.117.120.215:8080");
-var socket = new WebSocket("ws://10.1.31.107:8080");
+var socket = new WebSocket("ws://127.0.0.1:8080");
 var frameCount = 0;
 
-// 아... 정말 달렸다~~~ 힘들어.. 
 var input_id = document.querySelector("#input_id");
 var button_id = document.querySelector("#button_id");
 var range_hp = document.querySelector("#range_hp");
