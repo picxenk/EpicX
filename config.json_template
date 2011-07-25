@@ -1,11 +1,11 @@
 {
-    'host_ip': '127.0.0.1',
-    'http_port': 8000,
-    'ws_port': 8080,
-    'public_path': './public',
+    "host_ip": "127.0.0.1",
+    "http_port": 8000,
+    "ws_port": 8080,
+    "public_path": "./public",
 
-    'mongo_host': 'localhost',
-    'mongo_port': 27017,
-    'db': 'epicx',
-	'debug': false,
+    "mongo_host": "localhost",
+    "mongo_port": 27017,
+    "db": "epicx",
+    "debug": false
 }
