@@ -3,8 +3,9 @@ canvas.width = window.innerWidth - 450;
 canvas.height = 600;
 var ctx = canvas.getContext("2d");
 ctx.font = "12px Arial";
-//var socket = new WebSocket("ws://222.117.120.215:8080");
-var socket = new WebSocket("ws://127.0.0.1:8080");
+// var socket = new WebSocket("ws://222.117.120.215:8080");
+// var socket = io.connect("http://127.0.0.1:8000");
+var socket = io.connect("http://222.117.120.215:8000");
 var frameCount = 0;
 
 var input_id = document.querySelector("#input_id");
