@@ -1,26 +1,24 @@
-/** CONFIG **/
-var config = {
-    //'host_ip': '10.1.32.156',
-    'host_ip': '127.0.0.1',
-    'http_port': 8000,
-    'ws_port': 8080,
-    'public_path': './public',
+/** IMPORT MODULES **/
+require.paths.unshift(__dirname + '/server')
+var http = require('http');
+var fs = require('fs');
+var ws = require('websocket-server');
+var mongo = require('mongodb');
+var static = require('node-static');
+var EpicX = require('epicx').EpicX;
 
-    'mongo_host': 'localhost',
-    'mongo_port': 27017,
-    'db': 'epicx',
-	'debug': false,
-};
-
-/** REQUIRED MODULES **/
-require.paths.unshift(__dirname + '/server');
-var http = require('http'),
-    ws = require('websocket-server'),
-    mongo = require('mongodb'),
-    static = require('node-static'),
-    EpicX = require('epicx').EpicX;
-	count = 0,
-	ids = [];
+/** READ CONFIG **/
+var count = 0;
+var ids = [];
+var config = {};
+var encoding = 'utf-8';
+var config_file_name = 'config.json';
+try {
+    config = JSON.parse(fs.readFileSync(config_file_name, encoding));
+} catch(err) {
+    console.log(config_file_name + ' - file does not exist, please make the config file');
+    return;
+}
 
 /** INIT SERVICES **/
 var db = new mongo.Db(config.db, new mongo.Server(config.mongo_host, config.mongo_port, {}), {});
