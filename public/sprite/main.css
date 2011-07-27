@@ -1,0 +1,17 @@
+body {
+    margin: 0px;
+    padding: 0px;
+    overflow: hidden;
+}
+
+#canvas2d {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+
+#login {
+    position: fixed;
+    left: 10px;
+    top: 10px;
+}

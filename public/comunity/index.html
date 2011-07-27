@@ -1,0 +1,41 @@
+﻿<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/css/main.css"></link>
+        <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+	</head>
+	<body>
+		<div id="layer">
+			<div id="prop">
+				<div>
+					<button id="button_zoom_in">zoom in</button>
+					<button id="button_zoom_out">zoom out</button>
+				</div>
+				<div>
+					<label>id</label>
+					<input id="input_id"></input>
+					<button id="button_id">선택</button>
+				</div>
+				<div>
+					<label>message</label>
+					<input id="input_chat"></input>
+					<button id="button_chat">메시지</button>
+				</div>
+				<div>
+					<label>HP</label>
+					<input id="range_hp" type="range" min="1" max="10" value="1" />
+				</div>
+				<div>
+					<label>MP</label>
+					<input id="range_mp" type="range" min="1" max="10" value="1" />
+				</div>
+				<div id="member_info">
+				</div>
+			</div>
+			<div id="frame">
+				<canvas id="canvas"></canvas>
+			</div>
+		</div>
+		<script type="text/javascript" src="/js/GS.js"></script>
+		<script type="text/javascript" src="/js/main.js"></script>
+	</body>
+</html>

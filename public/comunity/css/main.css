@@ -1,0 +1,26 @@
+﻿body {
+	font-family: 맑은 고딕;
+}
+
+ul {
+}
+
+#layer {
+}
+
+#prop {
+	float: left;
+	margin-top: 10px;
+	margin-left: 10px;
+	position: fixed;
+	font-size: 11px;
+	width: 400px;
+}
+
+#m-prop {
+	margin-bottom: 2px;
+}
+
+#frame {
+	margin-left: 424px;
+}
