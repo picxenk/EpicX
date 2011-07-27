@@ -1,50 +1,25 @@
 var EpicX = function(db, callback) {
     this.db = db;
-    this.count = 0;
-    this.ids = [];
     this.log_header = '[EpicX]'
+    this.con = null;
+    // this.count = 0;
+    // this.ids = [];
 };
 
 EpicX.prototype = {
-    connect: function(con) {
-        this.count++;
-        this.ids[con.id] = this.count;
-        console.log(this.log_header+'connection:'+con.id + ' with id: '+this.count);
-        var data = {
-            type: 'welcome',
-            id: this.ids[con.id]
-        };
-
-        con.send(JSON.stringify(data));
-        console.log(this.log_header+'send: '+JSON.stringify(data));
+    send: function(type, data) {
+        this.con.emit(type, data);
     },
 
-    /** Run for message **/
-    run: function(con, msg) {
-        var message = JSON.parse(new Buffer(msg));
-        var data;
+    broadcast: function(type, data) {
+        this.con.broadcast.emit(type, data);
+    },
 
-        switch(message.type) {
-			case 'login':
-				this.msg_login(con, message);
-				return;
-				break;
-            case 'update':
-                data = this.msg_update(message);
-                break;
-            case 'chat':
-                data = this.msg_chat(message);
-                break;
-			case 'refresh':
-				this.msg_refresh(message);
-				break;
-            default:
-				console.log(this.log_header+'DO NOT UNDERSTOOD: '+message.type);
-				data = {type:'error', message:'type is not defined'};
-                break;
-        }
-        con.broadcast.emit(data);
-        console.log(this.log_header+'RUN END: '+JSON.stringify(data));
+    connect: function(con) {
+        this.con = con;
+        console.log(this.log_header+'connection:'+con.id);
+        var data = { msg: 'Welcome to paradise' };
+        this.send('welcome', data); 
     },
 
     /** Message : login **/
@@ -77,6 +52,8 @@ EpicX.prototype = {
             id: message.id,
             tox: parseFloat(message.tox),
             toy: parseFloat(message.toy),
+            dir_x: parseFloat(message.dir_x),
+            dir_y: parseFloat(message.dir_y),
 			// todir: parseFloat(message.todir),
 			// hp: parseFloat(message.hp),
 			// mp: parseFloat(message.mp),
@@ -100,6 +77,15 @@ EpicX.prototype = {
     msg_refresh: function(message) {
         console.log(this.log_header+'RUN(REFRESH)');
         return;
+    },
+    msg_fire: function(con, data) {
+        con.broadcast.emit('fire', data);
+        console.log(data);
+    },
+    msg_hit: function(con, data) {
+        con.broadcast.emit('hit', data);
+        con.emit('hit', data);
+        console.log(data);
     },
 
     /** When websocket connection is closed **/

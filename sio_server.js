@@ -47,9 +47,11 @@ var epicx = new EpicX(db);
 io.sockets.on('connection', function(con) {
     epicx.connect(con);
     con.on('close', function() {epicx.close(con)});
-    con.on('message', function(msg) {epicx.run(con, msg)});
     con.on('login', function(data) {epicx.msg_login(con, data)});
     con.on('update', function(data) {epicx.msg_update(con, data)});
+    // con.on('fire', function(data) {epicx.broadcast('fire', data)});
+    con.on('fire', function(data) {epicx.msg_fire(con, data)});
+    con.on('hit', function(data) {epicx.msg_hit(con, data)});
 });
 
 io.sockets.on('error', function(){

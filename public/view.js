@@ -3,8 +3,10 @@ var ctx = canvas.getContext("2d");
 var frameCount = 0;
 var ptcls = [];
 var thePtcl = null;
-//var socket = io.connect("ws://222.117.120.215:8000");
-var socket = io.connect("ws://172.16.2.248");
+var bullets = [];
+var socket = io.connect("ws://222.117.120.215:8000");
+//var socket = io.connect("ws://172.16.2.248");
+var angleMap = { a270: 0, a315: 1, a0: 2, a45: 3, a90: 4, a135: 5, a180: 6, a225: 7 };
 
 var camera = {
     x : 0,
@@ -32,10 +34,57 @@ var camera = {
     }
 };
 
+var fireBullet = function(pid, ox, oy, angle, lifespan) {
+    var bullet = {};
+    bullet.pid = pid;
+    bullet.lifespan = lifespan;
+    bullet.speed = 5;
+    bullet.x = ox;
+    bullet.y = oy;
+    bullet.dir = angle / 180 * Math.PI;
+    bullet.vx = bullet.speed * Math.cos(bullet.dir);
+    bullet.vy = bullet.speed * Math.sin(bullet.dir);
+    bullet.update = function() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if(this.lifespan > 0) {
+            this.lifespan -= 1;
+            if(this.lifespan === 0) {
+                var i = bullets.indexOf(this);
+                bullets.splice(i, 1);
+            }
+        }
+        
+        // collision
+        for(var i = 0; i < ptcls.length; i += 1) {
+            var ptcl = ptcls[i];
+            if(this.pid !== ptcl.id) {
+                var dx = this.x - ptcl.x;
+                var dy = this.y - ptcl.y;
+                var d = Math.sqrt(dx * dx + dy * dy);
+                if(d < 10) {
+                    console.log("hit by " + this.pid);
+                }
+            }
+        }
+    }
+    bullet.draw = function() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.beginPath();
+        ctx.arc(0, 0, 5, 0, Math.PI * 2);
+        ctx.fillStyle = "red";
+        ctx.fill();
+        ctx.restore();
+    }
+    bullets.push(bullet);
+}
+
 var createPtcl = function(img, sprite_info) {
     var ptcl = {};
     ptcl.id = 0;
     ptcl.img = img;
+    ptcl.sprite_info = sprite_info['main'];
     ptcl.x = 0;
     ptcl.y = 0;
     ptcl.to_x = ptcl.x;
@@ -49,8 +98,11 @@ var createPtcl = function(img, sprite_info) {
     ptcl.s_index = 0;
     ptcl.dir_x = 0;
     ptcl.dir_y = 0;
+    ptcl.dir = 0;
     ptcl.old_to_x = 0;
     ptcl.old_to_y = 0;
+    ptcl.pose = sprite_info['main']['poses'][4];
+    ptcl.frame = ptcl.pose[0];
     
     ptcl.update = function() {
         this.x += (this.to_x - this.x) * 0.1;
@@ -59,9 +111,20 @@ var createPtcl = function(img, sprite_info) {
         this.scale += (this.to_scale - this.scale) * 0.1;
         
         if(this.frameCount % 4 == 0) {
-            this.s_index += 1;
-            if(this.s_index > 15) this.s_index = 0;
-            
+            if(this.dir_x || this.dir_y) {
+                this.s_index += 1;
+                var theta = Math.atan2(this.dir_y, this.dir_x) / Math.PI * 180;
+                if(theta < 0) theta += 360;
+                var aIndex = (angleMap['a'+theta]);
+                this.pose = sprite_info['main']['poses'][aIndex];
+                this.dir = theta;
+            }
+            if(this.s_index % 2 === 0) {
+                this.frame = this.pose[0];
+            }
+            else {
+                this.frame = this.pose[1];
+            }
             if(thePtcl === this) {
                 this.to_x += this.dir_x * 10;
                 this.to_y += this.dir_y * 10;
@@ -73,7 +136,9 @@ var createPtcl = function(img, sprite_info) {
                     var data = {
                         id: this.id,
                         tox: this.to_x,
-                        toy: this.to_y
+                        toy: this.to_y,
+                        dir_x: this.dir_x,
+                        dir_y: this.dir_y
                     };
                     socket.emit('update', data); 
                 }
@@ -85,11 +150,12 @@ var createPtcl = function(img, sprite_info) {
         this.frameCount += 1;
     }
     ptcl.draw = function() {
+        var si = this.sprite_info;
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle / 180 * Math.PI);
         ctx.scale(this.scale, this.scale);
-        ctx.drawImage(this.img, 0 + this.s_index * 32, 0, 32, 32, 0 - 16, 0 - 16, 32, 32);
+        ctx.drawImage(this.img, 0 + this.frame * 32, 0, si.tw, si.th, 0 - si.tw / 2, 0 - si.th / 2, si.tw, si.th);
         ctx.restore();
     }
     
@@ -110,6 +176,9 @@ var update = function() {
         ptcls[i].update();
     }
     
+    for(var i = 0; i < bullets.length; i += 1) {
+        bullets[i].update();
+    }
 }
 
 var draw = function() {
@@ -122,11 +191,15 @@ var draw = function() {
         ptcls[i].draw();
     }
     
+    for(var i = 0; i < bullets.length; i += 1) {
+        bullets[i].draw();
+    }
+    
     camera.end(ctx);
 }
 
 var animate = function() {
-	webkitRequestAnimationFrame(animate);
+	//webkitRequestAnimationFrame(animate);
     
     if(!ASSET.isReady) return;
     
@@ -136,20 +209,32 @@ var animate = function() {
 }
 
 var addPtcl = function(sprite_src) {
-    var ptcl = createPtcl(sprite_src);
+    var sprite_info = {
+        main : {
+            tw: 32,
+            th: 32,
+            poses: [[0, 1], [2, 3], [4, 5], [6, 7], [8, 9], [10, 11], [12, 13], [14, 15]]
+        }
+    };    
+    var ptcl = createPtcl(sprite_src, sprite_info);
     ptcl.id = ptcls.length;
     ptcls.push(ptcl);
 }
 
 var initView = function() {
     resizeCanvas(window.innerWidth, window.innerHeight);
-    animate();
+    //animate();
+    setInterval(animate, 1000 / 60);
 }
 
 var initSprite = function() {
     for(var i = 0; i < 10; i += 1) {
         addPtcl( ASSET.sprite_src['sheet_characters'] );
     }
+    /*
+    addPtcl( ASSET.sprite_src['sheet_characters'] );
+    thePtcl = ptcls[0];
+    */
 }
 
 window.onresize = function(evt) {
@@ -172,6 +257,17 @@ window.onkeydown = function(evt) {
         case 40: // down
             thePtcl.dir_y = 1;
             return;
+        case 32: // space
+            fireBullet(thePtcl.id, thePtcl.x, thePtcl.y, thePtcl.dir, 100);
+            var data = {
+                id: thePtcl.id,
+                x: thePtcl.x,
+                y: thePtcl.y,
+                dir: thePtcl.dir,
+                lifespan: 100
+            }
+            socket.emit('fire', data);
+            return;
     }
 }
 
@@ -181,17 +277,26 @@ window.onkeyup = function(evt) {
     switch(evt.keyCode) {
         case 37: // left
             thePtcl.dir_x = 0;
-            return;
+            break;
         case 38: // up
             thePtcl.dir_y = 0;
-            return;
+            break;
         case 39: // right
             thePtcl.dir_x = 0;
-            return;
+            break;
         case 40: // down
             thePtcl.dir_y = 0;
-            return;
+            break;
     }
+
+    var data = {
+        id: thePtcl.id,
+        tox: thePtcl.to_x,
+        toy: thePtcl.to_y,
+        dir_x: thePtcl.dir_x,
+        dir_y: thePtcl.dir_y
+    };
+    socket.emit('update', data);
 }
 
 document.querySelector('#button_id').onclick = function(e) {
@@ -208,4 +313,10 @@ socket.on('update', function(data) {
     var ptcl = ptcls[parseInt(data.id)];
     ptcl.to_x = data.tox;
     ptcl.to_y = data.toy;
+    ptcl.dir_x = data.dir_x;
+    ptcl.dir_y = data.dir_y;
+});
+
+socket.on('fire', function(data) {
+    fireBullet(data.id, data.x, data.y, data.dir, data.lifespan);
 });
